@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de surveillance - Vigie</title>
+    <style>
+        :root {
+            --bg-page: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-hover: #1e293b;
+            --border: #2a364f;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --danger: #ff4d4d;
+            --danger-glow: rgba(255, 77, 77, 0.25);
+            --warning: #ffb703;
+            --warning-glow: rgba(255, 183, 3, 0.25);
+            --critical: #ff0055;
+            --critical-glow: rgba(255, 0, 85, 0.3);
+            --success: #10b981;
+            --primary-accent: #38bdf8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-title h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-title p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .badge-live {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 1.8s infinite;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-accent);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .kpi-card .label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-card .value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-top: 8px;
+            color: var(--text-main);
+        }
+
+        /* CARDS & TABLES */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #0f172a;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th:first-child { border-top-left-radius: 8px; }
+        th:last-child { border-top-right-radius: 8px; }
+
+        td {
+            padding: 14px 16px;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s ease;
+        }
+
+        tr {
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        .ip-code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+            font-weight: 700;
+            color: var(--primary-accent);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px transparent;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .badge.bloquer {
+            background: rgba(255, 77, 77, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .badge.enqueter {
+            background: rgba(255, 183, 3, 0.15);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .badge.compromission {
+            background: rgba(255, 0, 85, 0.2);
+            color: var(--critical);
+            border: 1px solid var(--critical);
+            animation: pulse-critical 2s infinite;
+        }
+
+        /* RECOMANDATIONS */
+        .reco-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .reco-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            background: #0f172a;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-accent);
+            font-size: 0.875rem;
+            transition: transform 0.2s ease;
+        }
+
+        .reco-item:hover {
+            transform: translateX(6px);
+        }
+
+        .reco-item.urgency {
+            border-left-color: var(--critical);
+            background: rgba(255, 0, 85, 0.05);
+        }
+
+        .reco-item.block {
+            border-left-color: var(--danger);
+        }
+
+        .reco-item.investigate {
+            border-left-color: var(--warning);
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-critical {
+            0%, 100% { box-shadow: 0 0 5px var(--critical-glow); }
+            50% { box-shadow: 0 0 15px var(--critical-glow); }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <div class="brand-title">
+                <h1>Rapport de surveillance Vigie</h1>
+                <p>Analyse de sécurité en temps réel & détections d'attaques</p>
+            </div>
+            <div class="badge-live">
+                <span class="pulse-dot"></span> Système Actif
+            </div>
+        </header>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="label">Total Alertes</div>
+                <div class="value">4</div>
+            </div>
+            <div class="kpi-card" style="border-bottom: 3px solid var(--critical);">
+                <div class="label">Accès Compromis</div>
+                <div class="value" style="color: var(--critical);">1</div>
+            </div>
+            <div class="kpi-card" style="border-bottom: 3px solid var(--danger);">
+                <div class="label">IPs à Bloquer</div>
+                <div class="value" style="color: var(--danger);">2</div>
+            </div>
+            <div class="kpi-card" style="border-bottom: 3px solid var(--warning);">
+                <div class="label">Enquêtes à Mener</div>
+                <div class="value" style="color: var(--warning);">1</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Alertes de force brute détectées</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Adresse IP</th>
+                        <th>Origine</th>
+                        <th>Comptes Ciblés</th>
+                        <th>Échecs</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th>Décision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="ip-code">198.51.100.77</span></td>
+                        <td>externe</td>
+                        <td>admin, root, user, test, backup, webmaster</td>
+                        <td><strong>13</strong></td>
+                        <td>2026-10-01 08:00</td>
+                        <td>2026-10-01 08:30</td>
+                        <td><span class="badge bloquer">Bloquer</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="ip-code">192.0.2.19</span></td>
+                        <td>interne (Site A)</td>
+                        <td>admin, root, user, test, backup, webmaster, manager...</td>
+                        <td><strong>8</strong></td>
+                        <td>2026-10-01 09:00</td>
+                        <td>2026-10-01 09:15</td>
+                        <td><span class="badge compromission">Compromission</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="ip-code">192.168.1.14</span></td>
+                        <td>interne (Site A)</td>
+                        <td>admin, root, user, test, backup, webmaster</td>
+                        <td><strong>6</strong></td>
+                        <td>2026-10-01 10:00</td>
+                        <td>2026-10-01 10:10</td>
+                        <td><span class="badge enqueter">Enquêter</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="ip-code">198.51.100.200</span></td>
+                        <td>externe</td>
+                        <td>admin, root, user, test, backup</td>
+                        <td><strong>5</strong></td>
+                        <td>2026-10-01 11:00</td>
+                        <td>2026-10-01 11:05</td>
+                        <td><span class="badge bloquer">Bloquer</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Recommandations d'action</h2>
+            <ul class="reco-list">
+                <li class="reco-item block">
+                    <span>L'adresse externe <strong>198.51.100.77</strong> doit être bloquée au niveau du pare-feu.</span>
+                </li>
+                <li class="reco-item urgency">
+                    <span><strong>Urgence :</strong> le compte compromis pour l'adresse <strong>192.0.2.19</strong> doit voir son mot de passe changé immédiatement et ses sessions actives fermées.</span>
+                </li>
+                <li class="reco-item investigate">
+                    <span>L'adresse interne <strong>192.168.1.14</strong> nécessite une enquête sur place pour identifier l'équipement concerné.</span>
+                </li>
+                <li class="reco-item block">
+                    <span>L'adresse externe <strong>198.51.100.200</strong> doit être bloquée au niveau du pare-feu.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
